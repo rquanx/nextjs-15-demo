@@ -1,23 +1,25 @@
 import { Session } from "@/app/hooks/useKrea";
+import dayjs from "dayjs";
+import { useState } from "react";
 import { Add } from "../Icon/Add";
 import { Delete } from "../Icon/Delete";
-import { useState } from "react";
-import dayjs from "dayjs";
 
 interface SessionInfoProps {
   session: Session;
   onDelete: (id: string) => void;
   selected: boolean;
+  onContextMenu: (type: 'session' | 'display', x: number, y: number, sessionId?: string) => void;
 }
 
-function SessionInfo({ session, onDelete, selected }: SessionInfoProps) {
+function SessionInfo({ session, onDelete, selected, onContextMenu }: SessionInfoProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isDeleteHovered, setIsDeleteHovered] = useState(false);
   return (
     <div
-      className={`bg-[var(--color-primary-250)] dark:bg-[var(--color-primary-850)] relative group flex items-center justify-center w-[52px] h-[52px] rounded-[10px] ${selected ? 'border-[#007aff] border-2' : ''}`}
+      className={`bg-white dark:bg-[var(--color-primary-850)] relative group flex items-center justify-center w-[52px] h-[52px] rounded-[10px] ${selected ? 'border-[#007aff] border-2' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onContextMenu={(e) => { e.preventDefault(); onContextMenu('session', e.clientX, e.clientY, session.id) }}
     >
       <div
         className="flex items-center justify-center w-full h-full">
@@ -63,6 +65,7 @@ interface SessionPanelProps {
   newSession: () => void;
   deleteSession: (id: string) => void;
   changeSession: (id: string) => void;
+  onContextMenu: (type: 'session' | 'display', x: number, y: number, sessionId?: string) => void;
 }
 
 export const Divider = () => {
@@ -72,7 +75,7 @@ export const Divider = () => {
   </div>
 }
 
-export function SessionPanel({ sessions, currentSession, newSession, deleteSession, changeSession }: SessionPanelProps) {
+export function SessionPanel({ sessions, currentSession, newSession, deleteSession, changeSession, onContextMenu }: SessionPanelProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -97,7 +100,6 @@ export function SessionPanel({ sessions, currentSession, newSession, deleteSessi
       </div>
       <Divider />
       {/* 会话列表 */}
-      {/* TODO: 右键时弹出删除菜单，样式逻辑参考 Display 组件里的实现，只有文案、图标、背景色不同 */}
       <div className="flex flex-col flex-1 gap-2">
         {sessions.map((session) => (
           <div
@@ -106,9 +108,10 @@ export function SessionPanel({ sessions, currentSession, newSession, deleteSessi
             onClick={() => changeSession(session.id)}
           >
             <SessionInfo
+              onDelete={deleteSession}
               selected={currentSession?.id === session.id}
               session={session}
-              onDelete={deleteSession}
+              onContextMenu={onContextMenu}
             />
           </div>
         ))}

@@ -3,11 +3,11 @@ import { Session } from "@/app/hooks/useKrea";
 import { useState, useEffect, useCallback } from "react";
 import { Upload } from "../Icon/Upload";
 import { SelectAssets } from "../Icon/SelectAssets";
-import { Download } from "../Icon/Download";
 
 interface DisplayProps {
   currentSession?: Session;
   addSession: (base64: string, prompt: string) => void;
+  onContextMenu: (type: 'session' | 'display', x: number, y: number, sessionId?: string) => void;
 }
 
 const NoneSession = ({ currentSession, addSession }: DisplayProps) => {
@@ -87,13 +87,11 @@ const NoneSession = ({ currentSession, addSession }: DisplayProps) => {
   }
 }
 
-const InteractiveSession = ({ currentSession }: Pick<DisplayProps, 'currentSession'>) => {
+const InteractiveSession = ({ currentSession, onContextMenu }: Pick<DisplayProps, 'currentSession' | 'onContextMenu'>) => {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [showContextMenu, setShowContextMenu] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
 
   // Reset transform when image changes
   useEffect(() => {
@@ -136,35 +134,16 @@ const InteractiveSession = ({ currentSession }: Pick<DisplayProps, 'currentSessi
       setIsDragging(false);
     };
 
-    const handleGlobalClick = () => {
-      setShowContextMenu(false);
-    };
-
     window.addEventListener('mouseup', handleGlobalMouseUp);
-    window.addEventListener('click', handleGlobalClick);
     return () => {
       window.removeEventListener('mouseup', handleGlobalMouseUp);
-      window.removeEventListener('click', handleGlobalClick);
     };
   }, []);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    setContextMenuPosition({ x: e.clientX, y: e.clientY });
-    setShowContextMenu(true);
-  }, []);
-
-  const handleDownload = useCallback(() => {
-    if (currentSession?.preview?.src) {
-      const link = document.createElement('a');
-      link.href = currentSession.preview.src;
-      link.download = `image-${Date.now()}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setShowContextMenu(false);
-    }
-  }, [currentSession?.preview?.src]);
+    onContextMenu('display', e.clientX, e.clientY);
+  }, [onContextMenu]);
 
   return (
     <div
@@ -185,32 +164,13 @@ const InteractiveSession = ({ currentSession }: Pick<DisplayProps, 'currentSessi
           transition: isDragging ? 'none' : 'transform 0.2s ease-out',
         }}
       />
-      {showContextMenu && (
-        <div
-          className="fixed thin-border bg-[var(--color-primary-150)]/75 rounded-[10px] p-1.5 z-50 w-fit min-w-32"
-          style={{
-            left: contextMenuPosition.x,
-            top: contextMenuPosition.y,
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            className="w-full leading-[16px] text-[12px] flex items-center justify-between gap-4 rounded-[5px] py-[4px] pr-1 pl-2 hover:bg-black/10 dark:hover:bg-white/10"
-            onClick={handleDownload}
-          >
-            <span>Download</span>
-            <Download className="text-[var(--color-primary-500)] bg-transparent ml-[4px] w-[12px] h-[12px]" />
-          </button>
-        </div>
-      )}
     </div>
   );
 }
 
-export function Display({ currentSession, addSession }: DisplayProps) {
-
+export function Display({ currentSession, addSession, onContextMenu }: DisplayProps) {
   if (!currentSession) {
-    return <NoneSession currentSession={currentSession} addSession={addSession} />
+    return <NoneSession currentSession={currentSession} addSession={addSession} onContextMenu={onContextMenu} />
   }
-  return <InteractiveSession currentSession={currentSession} />
+  return <InteractiveSession currentSession={currentSession} onContextMenu={onContextMenu} />
 }
