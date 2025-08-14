@@ -1,9 +1,13 @@
-import { useKrea } from "@/app/hooks/useKrea";
+import { Model } from "@/app/hooks/useKrea";
 import { Selected } from "../Icon/Selected";
 
-export function ModelsPanel() {
-  // TODO: 从 props 中获取这些信息
-  const { models, currentModelId, setCurrentModelId } = useKrea();
+interface ModelsPanelProps {
+  models: Model[];
+  currentModelId: string;
+  setCurrentModelId: (modelId: string) => void;
+}
+
+export function ModelsPanel({ models, currentModelId, setCurrentModelId }: ModelsPanelProps) {
 
   return (
     <div className="h-full p-4">
@@ -12,11 +16,10 @@ export function ModelsPanel() {
         {models.map((model) => (
           <div
             key={model.name}
-            className={`p-3 rounded-lg cursor-pointer transition-colors ${
-              currentModelId === model.name
+            className={`p-3 rounded-lg cursor-pointer transition-colors ${currentModelId === model.name
                 ? "bg-blue-50 border border-blue-200"
                 : "hover:bg-gray-50"
-            }`}
+              }`}
             onClick={() => setCurrentModelId(model.name)}
           >
             <div className="flex items-start gap-3">

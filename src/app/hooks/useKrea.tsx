@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useLocalStorageState } from "ahooks";
 import { useSearchParams } from "next/navigation";
 import { nanoid } from "nanoid";
@@ -6,15 +5,14 @@ import { TagInpainting } from "../components/Icon/TagInpainting";
 import { TagOutpainting } from "../components/Icon/TagOutpainting";
 import { TagPromptEdition } from "../components/Icon/TagPromptEdition";
 
-interface Generate {
+export interface Generate {
   id: string;
-  base64: string;
   sourceBase64: string;
   generateBase64: string[];
   prompt: string;
 }
 
-interface Session {
+export interface Session {
   id: string;
   previewImage: string;
   generates: Generate[]
@@ -22,12 +20,12 @@ interface Session {
   desc: string;
 }
 
-interface Tag {
+export interface Tag {
   icon: string | React.ReactNode;
   name: string;
 }
 
-interface Model {
+export interface Model {
   icon: string;
   name: string;
   desc: string;
@@ -88,11 +86,11 @@ export const useKrea = () => {
     defaultValue: [],
   });
 
-  const [currentSession, setCurrentSession] = useLocalStorageState<Session | null>("krea-current-session", {
-    defaultValue: sessionId ? sessions.find(s => s.id === sessionId) || null : sessions[0] || null,
+  const [currentSession, setCurrentSession] = useLocalStorageState<Session | undefined>("krea-current-session", {
+    defaultValue: sessionId ? sessions.find(s => s.id === sessionId) || undefined : sessions[0] || undefined,
   });
 
-  const [models, setModels] = useLocalStorageState<Model[]>("krea-models", {
+  const [models, _] = useLocalStorageState<Model[]>("krea-models", {
     defaultValue: [
       {
         icon: modelIcon,
@@ -130,7 +128,7 @@ export const useKrea = () => {
 
 
   const newSession = () => {
-    setCurrentSession(null);
+    setCurrentSession(undefined);
     // 使用 Next.js 的路由来更新 URL
     window.history.pushState({}, '', window.location.pathname);
   };
@@ -155,7 +153,7 @@ export const useKrea = () => {
       setSessions(newSessions);
 
       if (currentSession?.id === id) {
-        setCurrentSession(null);
+        setCurrentSession(undefined);
         window.history.pushState({}, '', window.location.pathname);
       }
     }
@@ -173,13 +171,14 @@ export const useKrea = () => {
     if (!currentSession) return;
 
     try {
-      // TODO：根据 Num 生成多个图片
-      const generatedBase64 = await generateImage(activeImage, prompt, num);
+      const generatedImages = await Promise.all(
+        Array(num).fill(null).map(() => generateImage(activeImage, prompt, 1))
+      );
+
       const newGenerate: Generate = {
         id: nanoid(),
-        base64: generatedBase64,
         sourceBase64: activeImage,
-        generateBase64: [generatedBase64],
+        generateBase64: generatedImages,
         prompt
       };
 
@@ -191,9 +190,9 @@ export const useKrea = () => {
       setCurrentSession(updatedSession);
       setSessions(sessions.map(s => s.id === currentSession.id ? updatedSession : s));
 
-      return generatedBase64;
+      return generatedImages[0]; // 返回第一张图片
     } catch (error) {
-      console.error('Failed to generate image:', error);
+      console.error('Failed to generate images:', error);
       throw error;
     }
   };
@@ -208,6 +207,6 @@ export const useKrea = () => {
     setCurrentModelId,
     generate,
     changeSession,
-    deleteSession
+    deleteSession, _
   };
 }

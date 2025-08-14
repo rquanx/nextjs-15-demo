@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { useKrea } from "@/app/hooks/useKrea";
+import { Session } from "@/app/hooks/useKrea";
 import { Generate } from "../Icon/Generate";
 
-export function ChatPanel() {
-  // TODO: 从 props 中获取这些信息
-  const { currentSession, generate } = useKrea();
+interface ChatPanelProps {
+  currentSession?: Session;
+  generate: (activeImage: string, prompt: string, num: number) => Promise<string | undefined>;
+}
+
+export function ChatPanel({ currentSession, generate }: ChatPanelProps) {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -15,8 +18,8 @@ export function ChatPanel() {
       setIsGenerating(true);
       // 获取当前会话中最新的图片
       const latestGenerate = currentSession.generates[currentSession.generates.length - 1];
-      const sourceImage = latestGenerate ? latestGenerate.base64 : currentSession.previewImage;
-      
+      const sourceImage = latestGenerate ? latestGenerate.sourceBase64 : currentSession.previewImage;
+
       await generate(sourceImage, prompt.trim(), currentSession.generates.length + 1);
       setPrompt("");
     } catch (error) {
@@ -46,11 +49,10 @@ export function ChatPanel() {
         <button
           onClick={handleGenerate}
           disabled={!currentSession || !prompt.trim() || isGenerating}
-          className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-            !currentSession || !prompt.trim() || isGenerating
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-blue-500 text-white hover:bg-blue-600"
-          } transition-colors`}
+          className={`px-4 py-2 rounded-lg flex items-center gap-2 ${!currentSession || !prompt.trim() || isGenerating
+            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+            : "bg-blue-500 text-white hover:bg-blue-600"
+            } transition-colors`}
         >
           <Generate className={`w-5 h-5 ${isGenerating ? "animate-spin" : ""}`} />
           <span>生成</span>

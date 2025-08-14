@@ -23,26 +23,43 @@ export default function Editor() {
     <div className="flex h-screen bg-gray-100">
       {/* 左侧会话面板 */}
       <div className="w-64 bg-white border-r border-gray-200">
-        <SessionPanel />
+        <SessionPanel 
+          sessions={sessions}
+          currentSession={currentSession}
+          newSession={newSession}
+          changeSession={changeSession}
+          deleteSession={deleteSession}
+        />
       </div>
 
       {/* 中间主要内容区域 */}
       <div className="flex-1 flex flex-col">
         <div className="flex-1 overflow-auto">
-          <Display />
+          <Display 
+            currentSession={currentSession}
+          />
         </div>
         <div className="h-64 border-t border-gray-200 bg-white">
-          <ChatPanel />
+          <ChatPanel 
+            currentSession={currentSession}
+            generate={generate}
+          />
         </div>
       </div>
 
       {/* 右侧面板 */}
       <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
         <div className="flex-1 overflow-auto">
-          <GeneratePanel />
+          <GeneratePanel 
+            addSession={addSession}
+          />
         </div>
         <div className="h-64 border-t border-gray-200">
-          <ModelsPanel />
+          <ModelsPanel 
+            models={models}
+            currentModelId={currentModelId}
+            setCurrentModelId={setCurrentModelId}
+          />
         </div>
       </div>
     </div>

@@ -1,13 +1,12 @@
 import { useRef } from "react";
-import { useKrea } from "@/app/hooks/useKrea";
 import { Inspiration } from "../Icon/Inspiration";
 
-export function GeneratePanel() {
+interface GeneratePanelProps {
+  addSession: (base64: string, prompt: string) => void;
+}
+
+export function GeneratePanel({ addSession }: GeneratePanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // TODO: 从 props 中获取这些信息
-  const { addSession } = useKrea();
-
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;

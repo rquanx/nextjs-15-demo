@@ -1,10 +1,16 @@
-import { useKrea } from "@/app/hooks/useKrea";
+import { Session } from "@/app/hooks/useKrea";
 import { Add } from "../Icon/Add";
 import { Delete } from "../Icon/Delete";
 
-export function SessionPanel() {
-  // TODO: 从 props 中获取这些信息
-  const { sessions, currentSession, newSession, deleteSession, changeSession } = useKrea();
+interface SessionPanelProps {
+  sessions: Session[];
+  currentSession?: Session;
+  newSession: () => void;
+  deleteSession: (id: string) => void;
+  changeSession: (id: string) => void;
+}
+
+export function SessionPanel({ sessions, currentSession, newSession, deleteSession, changeSession }: SessionPanelProps) {
 
   return (
     <div className="h-full flex flex-col">
@@ -25,9 +31,8 @@ export function SessionPanel() {
         {sessions.map((session) => (
           <div
             key={session.id}
-            className={`p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors ${
-              currentSession?.id === session.id ? 'bg-blue-50' : ''
-            }`}
+            className={`p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors ${currentSession?.id === session.id ? 'bg-blue-50' : ''
+              }`}
             onClick={() => changeSession(session.id)}
           >
             {/* 预览图 */}

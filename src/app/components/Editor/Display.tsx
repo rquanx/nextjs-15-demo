@@ -1,10 +1,11 @@
-import { useKrea } from "@/app/hooks/useKrea";
+import { Session } from "@/app/hooks/useKrea";
 import { Download } from "../Icon/Download";
 
-export function Display() {
-  // TODO: 从 props 中获取这些信息
-  const { currentSession } = useKrea();
+interface DisplayProps {
+  currentSession?: Session;
+}
 
+export function Display({ currentSession }: DisplayProps) {
   const handleDownload = (base64: string) => {
     const link = document.createElement('a');
     link.href = base64;
