@@ -1,13 +1,65 @@
-// TODO: 
-// 功能：根据传入的 models 以及当前选中的 modelID
-// UI：浮在左下角的下拉框，hover 后往上显示 model 列表
-// - select 样式：Model：{model_name} 往下的箭头
-// - select item 样式：
-//    - {model_icon} {model_name}
-//    - {model_desc}                                       勾选图标，只有勾选的时候显示使用 <Selected/> 组件
-//    - {model_tags} 圆角灰色背景，tag_icon  tag_name 横向排列  
-export const ModelsPanel = () => {
-  return <div>
+import { useKrea } from "@/app/hooks/useKrea";
+import { Selected } from "../Icon/Selected";
 
-  </div>
+export function ModelsPanel() {
+  // TODO: 从 props 中获取这些信息
+  const { models, currentModelId, setCurrentModelId } = useKrea();
+
+  return (
+    <div className="h-full p-4">
+      <h3 className="text-sm font-medium text-gray-900 mb-4">选择模型</h3>
+      <div className="space-y-3">
+        {models.map((model) => (
+          <div
+            key={model.name}
+            className={`p-3 rounded-lg cursor-pointer transition-colors ${
+              currentModelId === model.name
+                ? "bg-blue-50 border border-blue-200"
+                : "hover:bg-gray-50"
+            }`}
+            onClick={() => setCurrentModelId(model.name)}
+          >
+            <div className="flex items-start gap-3">
+              {/* 模型图标 */}
+              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                <img
+                  src={model.icon}
+                  alt={model.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* 模型信息 */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <div className="font-medium text-gray-900">{model.name}</div>
+                  {currentModelId === model.name && (
+                    <Selected className="w-4 h-4 text-blue-500" />
+                  )}
+                </div>
+                <div className="text-sm text-gray-500 mt-1">{model.desc}</div>
+
+                {/* 标签 */}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {model.tags.map((tag) => (
+                    <div
+                      key={tag.name}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-xs text-gray-600"
+                    >
+                      {typeof tag.icon === "string" ? (
+                        <img src={tag.icon} alt={tag.name} className="w-3 h-3" />
+                      ) : (
+                        tag.icon
+                      )}
+                      {tag.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }

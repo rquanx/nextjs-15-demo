@@ -8,12 +8,43 @@ import { ChatPanel } from "./ChatPanel";
 import { GeneratePanel } from "./GeneratePanel";
 
 export default function Editor() {
-  const { sessions, currentSession } = useKrea();
-  return <div>
-    <SessionPanel />
-    <Display />
-    <ChatPanel />
-    <GeneratePanel />
-    <ModelsPanel />
-  </div>
+  const { sessions,
+    currentSession,
+    newSession,
+    addSession,
+    models,
+    currentModelId,
+    setCurrentModelId,
+    generate,
+    changeSession,
+    deleteSession } = useKrea();
+    // TODO: 将组件需要的属性传递给组件
+  return (
+    <div className="flex h-screen bg-gray-100">
+      {/* 左侧会话面板 */}
+      <div className="w-64 bg-white border-r border-gray-200">
+        <SessionPanel />
+      </div>
+
+      {/* 中间主要内容区域 */}
+      <div className="flex-1 flex flex-col">
+        <div className="flex-1 overflow-auto">
+          <Display />
+        </div>
+        <div className="h-64 border-t border-gray-200 bg-white">
+          <ChatPanel />
+        </div>
+      </div>
+
+      {/* 右侧面板 */}
+      <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
+        <div className="flex-1 overflow-auto">
+          <GeneratePanel />
+        </div>
+        <div className="h-64 border-t border-gray-200">
+          <ModelsPanel />
+        </div>
+      </div>
+    </div>
+  );
 }

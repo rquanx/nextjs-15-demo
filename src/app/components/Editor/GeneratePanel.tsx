@@ -1,10 +1,69 @@
-// TODO: 浮动在右侧居中的 panel，灰色背景，圆角，没有 generate 时隐藏
-// 1.从上到先显示 Generate Item
-// 2.Genrate Item 结构：sourceImage generate_images,从左到右展示，圆角白色背景
-// 3.每个 item 间有一个灰色分割线
-// 4.默认选中第一个 item 的第一个generate_image，选中任意sourceImage generate_image后，切换当前显示的图片，更新选中状态
-export const GeneratePanel = () => {
-  return <div>
+import { useRef } from "react";
+import { useKrea } from "@/app/hooks/useKrea";
+import { Inspiration } from "../Icon/Inspiration";
 
-  </div>
+export function GeneratePanel() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // TODO: 从 props 中获取这些信息
+  const { addSession } = useKrea();
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      if (base64) {
+        addSession(base64, file.name);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="h-full p-4">
+      {/* 上传区域 */}
+      <div
+        className="h-48 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-blue-500 transition-colors"
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <Inspiration className="w-12 h-12 text-gray-400" />
+        <div className="text-center">
+          <div className="text-sm text-gray-600">点击或拖拽图片到这里</div>
+          <div className="text-xs text-gray-400 mt-1">支持 PNG、JPG 格式</div>
+        </div>
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+
+      {/* 提示词建议 */}
+      <div className="mt-8">
+        <h3 className="text-sm font-medium text-gray-900 mb-4">提示词建议</h3>
+        <div className="space-y-2">
+          {[
+            "添加更多细节和纹理",
+            "改变图片的风格为水彩画",
+            "将背景改为夜景",
+            "添加更多光影效果",
+            "改变季节为秋天",
+          ].map((suggestion, index) => (
+            <div
+              key={index}
+              className="p-3 bg-gray-50 rounded-lg text-sm text-gray-600 cursor-pointer hover:bg-gray-100 transition-colors"
+            >
+              {suggestion}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }

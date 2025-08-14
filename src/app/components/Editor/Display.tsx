@@ -1,11 +1,73 @@
-// TODO: 根据当前选中 session 显示图片，如果当前 session 为空，选手一个矩形、圆角、背景色灰色，有 session 后显示 session 图片
-// 按钮：
-// 1.Upload Image 按钮：点击后触发文件选择，选择文件后进行 addSession
-// 2.Select asset 按钮，点击后弹出一个弹窗
-// 显示的图片可以进行鼠标滚轮缩放，
-// 右键显示download 菜单,形式：Download <Download/>，点击后将当前显示的图片下载保存
-export const Display = () => {
-  return <div>
+import { useKrea } from "@/app/hooks/useKrea";
+import { Download } from "../Icon/Download";
 
-  </div>
+export function Display() {
+  // TODO: 从 props 中获取这些信息
+  const { currentSession } = useKrea();
+
+  const handleDownload = (base64: string) => {
+    const link = document.createElement('a');
+    link.href = base64;
+    link.download = `image-${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  if (!currentSession) {
+    return (
+      <div className="h-full flex items-center justify-center text-gray-400">
+        请选择或创建一个会话
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full p-6">
+      <div className="grid grid-cols-2 gap-6">
+        {currentSession.generates.map((generate) => (
+          <div key={generate.id} className="space-y-4">
+            {/* 原始图片 */}
+            <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+              <img
+                src={generate.sourceBase64}
+                alt="Source"
+                className="w-full h-full object-cover"
+              />
+              <button
+                onClick={() => handleDownload(generate.sourceBase64)}
+                className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
+              >
+                <Download className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* 生成的图片列表 */}
+            <div className="grid grid-cols-2 gap-4">
+              {generate.generateBase64.map((base64, index) => (
+                <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+                  <img
+                    src={base64}
+                    alt={`Generated ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    onClick={() => handleDownload(base64)}
+                    className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* 提示词 */}
+            <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+              {generate.prompt}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
