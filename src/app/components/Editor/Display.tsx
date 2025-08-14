@@ -1,8 +1,9 @@
 import { Session } from "@/app/hooks/useKrea";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Upload } from "../Icon/Upload";
 import { SelectAssets } from "../Icon/SelectAssets";
+import { Download } from "../Icon/Download";
 
 interface DisplayProps {
   currentSession?: Session;
@@ -91,6 +92,8 @@ const InteractiveSession = ({ currentSession }: Pick<DisplayProps, 'currentSessi
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
 
   // Reset transform when image changes
   useEffect(() => {
@@ -133,11 +136,35 @@ const InteractiveSession = ({ currentSession }: Pick<DisplayProps, 'currentSessi
       setIsDragging(false);
     };
 
+    const handleGlobalClick = () => {
+      setShowContextMenu(false);
+    };
+
     window.addEventListener('mouseup', handleGlobalMouseUp);
+    window.addEventListener('click', handleGlobalClick);
     return () => {
       window.removeEventListener('mouseup', handleGlobalMouseUp);
+      window.removeEventListener('click', handleGlobalClick);
     };
   }, []);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setShowContextMenu(true);
+  }, []);
+
+  const handleDownload = useCallback(() => {
+    if (currentSession?.preview?.src) {
+      const link = document.createElement('a');
+      link.href = currentSession.preview.src;
+      link.download = `image-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setShowContextMenu(false);
+    }
+  }, [currentSession?.preview?.src]);
 
   return (
     <div
@@ -146,7 +173,8 @@ const InteractiveSession = ({ currentSession }: Pick<DisplayProps, 'currentSessi
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}>
+      onMouseUp={handleMouseUp}
+      onContextMenu={handleContextMenu}>
       <img
         draggable={false}
         src={currentSession?.preview?.src}
@@ -157,6 +185,24 @@ const InteractiveSession = ({ currentSession }: Pick<DisplayProps, 'currentSessi
           transition: isDragging ? 'none' : 'transform 0.2s ease-out',
         }}
       />
+      {showContextMenu && (
+        <div
+          className="fixed thin-border bg-[var(--color-primary-150)]/75 rounded-[10px] p-1.5 z-50 w-fit min-w-32"
+          style={{
+            left: contextMenuPosition.x,
+            top: contextMenuPosition.y,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            className="w-full leading-[16px] text-[12px] flex items-center justify-between gap-4 rounded-[5px] py-[4px] pr-1 pl-2 hover:bg-black/10 dark:hover:bg-white/10"
+            onClick={handleDownload}
+          >
+            <span>Download</span>
+            <Download className="text-[var(--color-primary-500)] bg-transparent ml-[4px] w-[12px] h-[12px]" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

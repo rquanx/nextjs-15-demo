@@ -97,11 +97,12 @@ export function SessionPanel({ sessions, currentSession, newSession, deleteSessi
       </div>
       <Divider />
       {/* 会话列表 */}
+      {/* TODO: 右键时弹出删除菜单，样式逻辑参考 Display 组件里的实现，只有文案、图标、背景色不同 */}
       <div className="flex flex-col flex-1 gap-2">
         {sessions.map((session) => (
           <div
             key={session.id}
-            className={`pointer-events-auto shrink-0 rounded-md bg-cover bg-center transition-[transform,scale,box-shadow] duration-200 ease-out hover:scale-105`}
+            className={`cursor-pointer shrink-0 rounded-md bg-cover bg-center transition-[transform,scale,box-shadow] duration-200 ease-out hover:scale-105`}
             onClick={() => changeSession(session.id)}
           >
             <SessionInfo
