@@ -1,0 +1,3 @@
+export const Add = () => {
+  return <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon lucide lucide-plus text-primary-1000 dark:text-primary-0 absolute inset-0 m-auto"><!----><path d="M5 12h14"></path><!----><path d="M12 5v14"></path><!----><!----><!----></svg>
+}
