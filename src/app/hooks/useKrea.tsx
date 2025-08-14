@@ -147,8 +147,7 @@ export const useKrea = () => {
   };
 
   const deleteSession = (id: string) => {
-    // TODO: 使用 @heroui 里的 Confirm 组件
-    if (window.confirm('确定要删除这个会话吗？')) {
+    if (window.confirm('Delete this session?')) {
       const newSessions = sessions.filter(s => s.id !== id);
       setSessions(newSessions);
 

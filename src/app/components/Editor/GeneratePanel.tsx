@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { Generate, ImageItem, Session } from '../../hooks/useKrea';
 import { Divider } from './SessionPanel';
 
@@ -32,10 +33,10 @@ export function GeneratePanel({ changeSessionImage, session }: GeneratePanelProp
   gap-1.5 overflow-scroll rounded-[20px] p-2 text-black backdrop-blur-2xl 
   transition-[background,height] duration-150 ease-out disabled:hover:bg-red-600! dark:text-white">{
       session.generates.map((generate, index) => (
-        <>
+        <Fragment key={generate.id}>
           <GenerateItem generate={generate} key={generate.id} changeSessionImage={changeSessionImage} session={session} />
           {index !== session.generates.length - 1 && <Divider />}
-        </>
+        </Fragment>
       ))
     }</div>
 }
