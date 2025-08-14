@@ -6,16 +6,21 @@ import { TagOutpainting } from "../components/Icon/TagOutpainting";
 import { TagPromptEdition } from "../components/Icon/TagPromptEdition";
 import { useState } from "react";
 
+export interface ImageItem {
+  src: string;
+  id: string;
+}
+
 export interface Generate {
   id: string;
   sourceBase64: string;
-  generateBase64: string[];
+  generateBase64: ImageItem[];
   prompt: string;
 }
 
 export interface Session {
   id: string;
-  previewImage: string;
+  preview: ImageItem;
   generates: Generate[]
   createdAt: number;
   desc: string;
@@ -55,17 +60,15 @@ const generateImage = (sourceImage: string, prompt: string, num: number): Promis
       ctx.drawImage(img, 0, 0);
 
       // 设置文字样式
-      ctx.font = "24px Arial";
-      ctx.fillStyle = "white";
+      ctx.font = "44px Arial";
+      ctx.fillStyle = "red";
       ctx.strokeStyle = "black";
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
 
-      // TODO：文字绘制到图片中间，字体大小比较明显
       // 绘制文字
-      const text = `${num}. ${prompt}`;
-      const padding = 20;
-      ctx.strokeText(text, padding, canvas.height - padding);
-      ctx.fillText(text, padding, canvas.height - padding);
+      const text = `number: ${num}. ${prompt}`;
+      ctx.strokeText(text, canvas.width / 2, canvas.height / 2);
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
       // 导出为base64
       resolve(canvas.toDataURL("image/png"));
@@ -87,7 +90,7 @@ export const useKrea = () => {
     defaultValue: [],
   });
 
-  const [currentSession, setCurrentSession] = useState<Session | undefined>(sessionId ? sessions.find(s => s.id === sessionId) || undefined : sessions[0] || undefined);
+  const [currentSession, setCurrentSession] = useState<Session | undefined>(sessionId ? sessions.find(s => s.id === sessionId) : undefined);
 
   const [models, _] = useLocalStorageState<Model[]>("krea-models", {
     defaultValue: [
@@ -128,14 +131,13 @@ export const useKrea = () => {
 
   const newSession = () => {
     setCurrentSession(undefined);
-    // 使用 Next.js 的路由来更新 URL
     window.history.pushState({}, '', window.location.pathname);
   };
 
   const addSession = (base64: string, prompt: string) => {
     const newSession: Session = {
       id: nanoid(),
-      previewImage: base64,
+      preview: { src: base64, id: nanoid() },
       generates: [],
       createdAt: Date.now(),
       desc: prompt
@@ -170,34 +172,34 @@ export const useKrea = () => {
 
     try {
       const generatedImages = await Promise.all(
-        Array(num).fill(null).map(() => generateImage(activeImage, prompt, 1))
+        Array(num).fill(null).map((i, index) => generateImage(activeImage, prompt, index + 1))
       );
 
       const newGenerate: Generate = {
         id: nanoid(),
         sourceBase64: activeImage,
-        generateBase64: generatedImages,
+        generateBase64: generatedImages.map(i => ({ src: i, id: nanoid() })),
         prompt
       };
 
-      const updatedSession = {
+      const updatedSession: Session = {
         ...currentSession,
-        generates: [...currentSession.generates, newGenerate]
+        generates: [...currentSession.generates, newGenerate],
+        preview: newGenerate.generateBase64[0]
       };
-
       setCurrentSession(updatedSession);
-      setSessions(sessions.map(s => s.id === currentSession.id ? updatedSession : s));
-
-      return generatedImages[0]; // 返回第一张图片
+      const isSessionCreated = sessions.find(i => i.id === updatedSession.id);
+      const newSession = isSessionCreated ? sessions.map(i => i.id === updatedSession.id ? updatedSession : i) : [updatedSession, ...sessions]
+      setSessions(newSession);
     } catch (error) {
       console.error('Failed to generate images:', error);
       throw error;
     }
   };
 
-  const changeSessionImage = (base64: string) => {
+  const changeSessionImage = (previewItem: ImageItem) => {
     if (!currentSession) return;
-    setCurrentSession({ ...currentSession, previewImage: base64 });
+    setCurrentSession({ ...currentSession, preview: previewItem });
   };
 
   return {

@@ -96,7 +96,7 @@ const InteractiveSession = ({ currentSession }: Pick<DisplayProps, 'currentSessi
   useEffect(() => {
     setScale(1);
     setPosition({ x: 0, y: 0 });
-  }, [currentSession?.previewImage]);
+  }, [currentSession?.preview?.src]);
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
@@ -140,14 +140,16 @@ const InteractiveSession = ({ currentSession }: Pick<DisplayProps, 'currentSessi
   }, []);
 
   return (
-    <div 
-      className="h-full w-full flex flex-col items-center justify-center relative overflow-hidden"
+    <div
+      className="h-full w-full flex flex-col items-center justify-center relative overflow-hidden
+      cursor-grab"
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}>
       <img
-        src={currentSession?.previewImage}
+        draggable={false}
+        src={currentSession?.preview?.src}
         alt="Generated"
         className="max-w-full max-h-full object-contain select-none"
         style={{

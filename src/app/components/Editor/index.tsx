@@ -19,11 +19,10 @@ export default function Editor() {
     changeSession,
     changeSessionImage,
     deleteSession } = useKrea();
-  // TODO: 将组件需要的属性传递给组件
   return (
     <div className="flex h-screen bg-withe relative">
       {/* 左侧会话面板 */}
-      <div className="absolute left-[3px] top-[50%] translate-y-[-50%] w-[72px] h-[384px] p-[10px] rounded-[10px] select-none
+      {sessions.length > 0 && <div className="absolute left-[3px] top-[50%] translate-y-[-50%] w-[72px] h-[384px] p-[10px] rounded-[10px] select-none
 			bg-[#f1f1f1] dark:bg-[#000] z-1">
         <SessionPanel
           sessions={sessions}
@@ -32,7 +31,7 @@ export default function Editor() {
           changeSession={changeSession}
           deleteSession={deleteSession}
         />
-      </div>
+      </div>}
 
       {/* 中间主要内容区域 */}
       <div className="flex-1 flex flex-col relative">

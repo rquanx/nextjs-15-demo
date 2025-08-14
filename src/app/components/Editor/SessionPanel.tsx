@@ -21,9 +21,9 @@ function SessionInfo({ session, onDelete, selected }: SessionInfoProps) {
     >
       <div
         className="flex items-center justify-center w-full h-full">
-        {session.previewImage && (
+        {session.preview?.src && (
           <img
-            src={session.previewImage}
+            src={session.preview.src}
             alt="Preview"
             className="w-full h-full object-contain rounded-[10px]"
           />
@@ -38,7 +38,7 @@ function SessionInfo({ session, onDelete, selected }: SessionInfoProps) {
 				transition-[scale] svelte-ssa8x0" >
         <div className="cursor-pointer pr-[40px] relative w-fit text-[var(--color-primary-1000)] dark:text-[var(--color-primary-0)] ml-2 flex flex-row transition-opacity duration-200 ease-out svelte-ssa8x0">
           <div className="w-fit flex flex-col">
-            <p className="w-fit font-book truncate text-sm leading-none svelte-ssa8x0 whitespace-nowrap overflow-hidden text-ellipsis">{session.desc}</p>
+            <p className="w-fit font-book truncate text-sm leading-none svelte-ssa8x0 whitespace-nowrap overflow-hidden text-ellipsis">temp description</p>
             <p className="text-[var(--color-primary-400)] text-[12px] whitespace-nowrap overflow-hidden text-ellipsis">{dayjs(session.createdAt).isSame(dayjs(), 'day') ? 'Today' : dayjs(session.createdAt).format('MMM D, YYYY')}</p>
           </div>
           <button

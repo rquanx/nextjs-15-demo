@@ -5,7 +5,7 @@ import { Inspiration } from "../Icon/Inspiration";
 
 interface ChatPanelProps {
   currentSession?: Session;
-  generate: (activeImage: string, prompt: string, num: number) => Promise<string | undefined>;
+  generate: (activeImage: string, prompt: string, num: number) => Promise<void>;
 }
 
 export function ChatPanel({ currentSession, generate }: ChatPanelProps) {
@@ -18,11 +18,8 @@ export function ChatPanel({ currentSession, generate }: ChatPanelProps) {
 
     try {
       setIsGenerating(true);
-      // 获取当前会话中最新的图片
-      const latestGenerate = currentSession.generates[currentSession.generates.length - 1];
-      const sourceImage = latestGenerate ? latestGenerate.sourceBase64 : currentSession.previewImage;
 
-      await generate(sourceImage, prompt.trim(), num);
+      await generate(currentSession.preview?.src, prompt.trim(), num);
       setPrompt("");
     } catch (error) {
       console.error("Failed to generate:", error);
