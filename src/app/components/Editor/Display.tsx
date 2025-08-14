@@ -1,74 +1,168 @@
 import { Session } from "@/app/hooks/useKrea";
-import { Download } from "../Icon/Download";
+
+import { useState, useEffect } from "react";
+import { Upload } from "../Icon/Upload";
+import { SelectAssets } from "../Icon/SelectAssets";
 
 interface DisplayProps {
   currentSession?: Session;
+  addSession: (base64: string, prompt: string) => void;
 }
 
-export function Display({ currentSession }: DisplayProps) {
-  const handleDownload = (base64: string) => {
-    const link = document.createElement('a');
-    link.href = base64;
-    link.download = `image-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+const NoneSession = ({ currentSession, addSession }: DisplayProps) => {
+  const [isDragging, setIsDragging] = useState(false);
 
   if (!currentSession) {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64 = e.target?.result as string;
+          addSession(base64, '');
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64 = e.target?.result as string;
+          addSession(base64, '');
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
     return (
-      <div className="h-full flex items-center justify-center text-gray-400">
-        请选择或创建一个会话
+      <div
+        className="h-full flex flex-col items-center justify-center"
+      >
+        <div
+          className={`bg-[var(--color-primary-100)] w-[420px] h-[508px] p-[96px_40px_48px_40px] rounded-[32px] 
+            flex flex-col items-center justify-end transition-colors outline-none  ${isDragging ? 'border-[#007aff] border-2' : ''}`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className="flex gap-2 w-full h-14">
+            <label className="cursor-pointer transition-colors 
+            text-[var(--color-primary-0)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)]  transition-color flex h-full w-1/2
+            items-center justify-center rounded-[14px] ease-out
+		  duration-150 svelte-1h0p8mr">
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              <Upload className="text-white" />
+              <span className="pl-[2px]">Upload image</span>
+            </label>
+            <button className="cursor-pointer rounded-[14px] transition-colors flex items-center justify-center 
+            bg-[var(--color-action)]/15 hover:bg-[var(--color-action-hover)]/15 text-[var(--color-action)] h-full w-1/2 svelte-1h0p8mr">
+              <SelectAssets />
+              <span className="pl-[2px]">Select asset</span>
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
+}
+
+const InteractiveSession = ({ currentSession }: Pick<DisplayProps, 'currentSession'>) => {
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  // Reset transform when image changes
+  useEffect(() => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  }, [currentSession?.previewImage]);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = -e.deltaY;
+    const zoomFactor = 0.1;
+    const newScale = Math.max(0.1, scale + (delta > 0 ? zoomFactor : -zoomFactor));
+    setScale(newScale);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Add mouse up listener to window to handle cases where mouse is released outside the component
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => {
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, []);
 
   return (
-    <div className="h-full p-6">
-      <div className="grid grid-cols-2 gap-6">
-        {currentSession.generates.map((generate) => (
-          <div key={generate.id} className="space-y-4">
-            {/* 原始图片 */}
-            <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-              <img
-                src={generate.sourceBase64}
-                alt="Source"
-                className="w-full h-full object-cover"
-              />
-              <button
-                onClick={() => handleDownload(generate.sourceBase64)}
-                className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
-              >
-                <Download className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* 生成的图片列表 */}
-            <div className="grid grid-cols-2 gap-4">
-              {generate.generateBase64.map((base64, index) => (
-                <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                  <img
-                    src={base64}
-                    alt={`Generated ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    onClick={() => handleDownload(base64)}
-                    className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* 提示词 */}
-            <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-              {generate.prompt}
-            </div>
-          </div>
-        ))}
-      </div>
+    <div 
+      className="h-full w-full flex flex-col items-center justify-center relative overflow-hidden"
+      onWheel={handleWheel}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}>
+      <img
+        src={currentSession?.previewImage}
+        alt="Generated"
+        className="max-w-full max-h-full object-contain select-none"
+        style={{
+          transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+          transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+        }}
+      />
     </div>
   );
+}
+
+export function Display({ currentSession, addSession }: DisplayProps) {
+
+  if (!currentSession) {
+    return <NoneSession currentSession={currentSession} addSession={addSession} />
+  }
+  return <InteractiveSession currentSession={currentSession} />
 }

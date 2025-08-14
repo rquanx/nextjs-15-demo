@@ -17,13 +17,15 @@ export default function Editor() {
     setCurrentModelId,
     generate,
     changeSession,
+    changeSessionImage,
     deleteSession } = useKrea();
-    // TODO: 将组件需要的属性传递给组件
+  // TODO: 将组件需要的属性传递给组件
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-withe relative">
       {/* 左侧会话面板 */}
-      <div className="w-64 bg-white border-r border-gray-200">
-        <SessionPanel 
+      <div className="absolute left-[3px] top-[50%] translate-y-[-50%] w-[72px] h-[384px] p-[10px] rounded-[10px] select-none
+			bg-[#f1f1f1] dark:bg-[#000] z-1">
+        <SessionPanel
           sessions={sessions}
           currentSession={currentSession}
           newSession={newSession}
@@ -33,34 +35,34 @@ export default function Editor() {
       </div>
 
       {/* 中间主要内容区域 */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative">
         <div className="flex-1 overflow-auto">
-          <Display 
+          <Display
+            addSession={addSession}
             currentSession={currentSession}
           />
         </div>
-        <div className="h-64 border-t border-gray-200 bg-white">
-          <ChatPanel 
+        {currentSession && <div className="fixed bottom-[16px] left-[50%] translate-x-[-50%]">
+          <ChatPanel
             currentSession={currentSession}
             generate={generate}
           />
-        </div>
+        </div>}
       </div>
 
       {/* 右侧面板 */}
-      <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
-        <div className="flex-1 overflow-auto">
-          <GeneratePanel 
-            addSession={addSession}
-          />
-        </div>
-        <div className="h-64 border-t border-gray-200">
-          <ModelsPanel 
-            models={models}
-            currentModelId={currentModelId}
-            setCurrentModelId={setCurrentModelId}
-          />
-        </div>
+      <div className="fixed right-[16px] top-[50%] translate-y-[-50%]">
+        <GeneratePanel
+          changeSessionImage={changeSessionImage}
+          session={currentSession}
+        />
+      </div>
+      <div className="fixed bottom-[8px] left-[16px]">
+        <ModelsPanel
+          models={models}
+          currentModelId={currentModelId}
+          setCurrentModelId={setCurrentModelId}
+        />
       </div>
     </div>
   );

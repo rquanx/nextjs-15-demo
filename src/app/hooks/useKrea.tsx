@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import { TagInpainting } from "../components/Icon/TagInpainting";
 import { TagOutpainting } from "../components/Icon/TagOutpainting";
 import { TagPromptEdition } from "../components/Icon/TagPromptEdition";
+import { useState } from "react";
 
 export interface Generate {
   id: string;
@@ -32,7 +33,7 @@ export interface Model {
   tags: Tag[];
 }
 
-const modelIcon = 'data:image/webp;base64,UklGRtIEAABXRUJQVlA4WAoAAAAQAAAAfwAAfwAAQUxQSGYEAAABoAVJtmnbGte2bdu2bdu2bdu2bdu+99m2ce1+OKfW2nuv9fniRcQE2H+9Fqzvd18rur8Nk475Wg5J6uxnn/xL6f1rtcJ837fqKNyZPhXzeXgq5k8nBL/3pe7CO3wohxy2958vnCip38yW46s+U1UujvWVOM/dUBE/OS5Xv/ORTnJ5tW+klus1/eJt954l8IdZwr99inTBF0qLl43D1M8HIvzGDpsNZsrsfUeF70c3s6vsE8/rJF7NzCzJC6RFHpdafK6FWY+psre9wd63cNeyh9G9bKx4xvDsB6RDHlZcfKDBYkzdPCviz+yi4XFMab1qt/CjmMyusfc9qqF4LXOYjGmiJ8V9wdaZ4w5MhbzohvBn5uJ29mdk75kgnsEN+w5pn+fkFB9krhZjauo1X7Ar5vJ09jyRt2wVfpHQLXsP6Q1PaSzewNz/E2mjh8R/xtYbb9+5I2y9dNUauHZjMu84L/yN8Yni2QzX+sIzBojnY4XFWxuOdl9rPCKH+Fjj37JDxk9IauANn7ErxlcJP4zO+knS87hesFz4VULWVLyi4cwK87wH1BZvZjiJ+FzjH4WlASEXT3yn8WvsHeNLFX62UDvDfojK+otnYhUFvwix3uIFDWcR72k4+n2i5SGVUXyc8a/ZMeNHxKuG0jvsHeMrhB9GZq3l8EGc0FkknoZVFa9sOJ0cnw2ZquLtDcd+zJYYf9+Z+oRI5Edsj/HLwl8anyo304fGXuE/o7De4vlYfrn6Vkh0FC9vOKN4H8ORf3ZH80Igo/hk4x+zM8b3y+2qwfcBe8v4POHXcVhruf4oerBNFE/HKorXNZzolXvaG2RlxLsZjvGILTd+RXhfGaZuQRXjPjtq/JjwF8YniCezsUwZg2mf8P1orJN4HpZXvKOZXWdvB1FL8YqG04uPMf4V221mlpRpStAkec3mG/+QnTe+Rvj3SP+y5kxFguW28GfGZwm/jMuqi5e1sHexX6MGxwTxTKyQeDPD8Z6yuRZutN+Q9gRFYfHuhqP+zHYYPy/8rsHCTC2C4Qd22vhh4V+N9xFPR2wiU7LA7RF+GJt1FM/Lsot3M/4muxWw5uJ1DCcRH2f8K3bBHKZjGhegJK/ZEuM32T3ji4Tvx3dirZkKBeaa8CfGJ4inYJXFK5vzXeyHgAwVz8qKijczHPkBW24uRvwDaWMACoiPMP4d22N8r/C35molpmbufcOuGd8s/Htk1kM8lzs2h71K6NZm4SexWSvx4obTifcxt99CuulSdfEGhhOJLzD+JrturqdnGuBKjMdsq/Fr7C3jk4RfJnbP+jBld+OS8AfGhwk/jcfKiTezQB5k37swVPjPVKy48KtmhhP8wZZZQCN9jrTBUSY5OP3W2/DuSwdn33gb3vlJPHVgrA9TTScfOgjZPAHq6+BhHLZG3lggQIMd6AqqJT/SYBDzgT8pc3jH5FMfh9NVfqVFYWSWf6n6vz7wswfRzJbIQwsFaLgbOm3N5aVFAjTGFY20//0IVlA4IEYAAABwBgCdASqAAIAAPpFIoUylpCMiIIgAsBIJaW7hdJAAT22IvEFRz2xF4gqOe2IvEFRz2xF4gqOe2IvEE2AA/v9F+AAAAAAA'
+export const modelIcon = 'data:image/webp;base64,UklGRtIEAABXRUJQVlA4WAoAAAAQAAAAfwAAfwAAQUxQSGYEAAABoAVJtmnbGte2bdu2bdu2bdu2bdu+99m2ce1+OKfW2nuv9fniRcQE2H+9Fqzvd18rur8Nk475Wg5J6uxnn/xL6f1rtcJ837fqKNyZPhXzeXgq5k8nBL/3pe7CO3wohxy2958vnCip38yW46s+U1UujvWVOM/dUBE/OS5Xv/ORTnJ5tW+klus1/eJt954l8IdZwr99inTBF0qLl43D1M8HIvzGDpsNZsrsfUeF70c3s6vsE8/rJF7NzCzJC6RFHpdafK6FWY+psre9wd63cNeyh9G9bKx4xvDsB6RDHlZcfKDBYkzdPCviz+yi4XFMab1qt/CjmMyusfc9qqF4LXOYjGmiJ8V9wdaZ4w5MhbzohvBn5uJ29mdk75kgnsEN+w5pn+fkFB9krhZjauo1X7Ar5vJ09jyRt2wVfpHQLXsP6Q1PaSzewNz/E2mjh8R/xtYbb9+5I2y9dNUauHZjMu84L/yN8Yni2QzX+sIzBojnY4XFWxuOdl9rPCKH+Fjj37JDxk9IauANn7ErxlcJP4zO+knS87hesFz4VULWVLyi4cwK87wH1BZvZjiJ+FzjH4WlASEXT3yn8WvsHeNLFX62UDvDfojK+otnYhUFvwix3uIFDWcR72k4+n2i5SGVUXyc8a/ZMeNHxKuG0jvsHeMrhB9GZq3l8EGc0FkknoZVFa9sOJ0cnw2ZquLtDcd+zJYYf9+Z+oRI5Edsj/HLwl8anyo304fGXuE/o7De4vlYfrn6Vkh0FC9vOKN4H8ORf3ZH80Igo/hk4x+zM8b3y+2qwfcBe8v4POHXcVhruf4oerBNFE/HKorXNZzolXvaG2RlxLsZjvGILTd+RXhfGaZuQRXjPjtq/JjwF8YniCezsUwZg2mf8P1orJN4HpZXvKOZXWdvB1FL8YqG04uPMf4V221mlpRpStAkec3mG/+QnTe+Rvj3SP+y5kxFguW28GfGZwm/jMuqi5e1sHexX6MGxwTxTKyQeDPD8Z6yuRZutN+Q9gRFYfHuhqP+zHYYPy/8rsHCTC2C4Qd22vhh4V+N9xFPR2wiU7LA7RF+GJt1FM/Lsot3M/4muxWw5uJ1DCcRH2f8K3bBHKZjGhegJK/ZEuM32T3ji4Tvx3dirZkKBeaa8CfGJ4inYJXFK5vzXeyHgAwVz8qKijczHPkBW24uRvwDaWMACoiPMP4d22N8r/C35molpmbufcOuGd8s/Htk1kM8lzs2h71K6NZm4SexWSvx4obTifcxt99CuulSdfEGhhOJLzD+JrturqdnGuBKjMdsq/Fr7C3jk4RfJnbP+jBld+OS8AfGhwk/jcfKiTezQB5k37swVPjPVKy48KtmhhP8wZZZQCN9jrTBUSY5OP3W2/DuSwdn33gb3vlJPHVgrA9TTScfOgjZPAHq6+BhHLZG3lggQIMd6AqqJT/SYBDzgT8pc3jH5FMfh9NVfqVFYWSWf6n6vz7wswfRzJbIQwsFaLgbOm3N5aVFAjTGFY20//0IVlA4IEYAAABwBgCdASqAAIAAPpFIoUylpCMiIIgAsBIJaW7hdJAAT22IvEFRz2xF4gqOe2IvEFRz2xF4gqOe2IvEE2AA/v9F+AAAAAAA'
 
 const generateImage = (sourceImage: string, prompt: string, num: number): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -86,9 +87,7 @@ export const useKrea = () => {
     defaultValue: [],
   });
 
-  const [currentSession, setCurrentSession] = useLocalStorageState<Session | undefined>("krea-current-session", {
-    defaultValue: sessionId ? sessions.find(s => s.id === sessionId) || undefined : sessions[0] || undefined,
-  });
+  const [currentSession, setCurrentSession] = useState<Session | undefined>(sessionId ? sessions.find(s => s.id === sessionId) || undefined : sessions[0] || undefined);
 
   const [models, _] = useLocalStorageState<Model[]>("krea-models", {
     defaultValue: [
@@ -141,7 +140,6 @@ export const useKrea = () => {
       createdAt: Date.now(),
       desc: prompt
     };
-    setSessions([...sessions, newSession]);
     setCurrentSession(newSession);
     window.history.pushState({}, '', `${window.location.pathname}?id=${newSession.id}`);
   };
@@ -197,6 +195,11 @@ export const useKrea = () => {
     }
   };
 
+  const changeSessionImage = (base64: string) => {
+    if (!currentSession) return;
+    setCurrentSession({ ...currentSession, previewImage: base64 });
+  };
+
   return {
     sessions,
     currentSession,
@@ -207,6 +210,6 @@ export const useKrea = () => {
     setCurrentModelId,
     generate,
     changeSession,
-    deleteSession, _
+    deleteSession, _, changeSessionImage
   };
 }
