@@ -7,7 +7,7 @@ import { Selected } from "../Icon/Selected";
 
 export const ModelItem = ({ model, selectedId }: { model: Model, selectedId: string }) => {
   const isSelected = model.name === selectedId
-  return <div className="flex flex-row items-center 
+  return <div className="flex flex-row items-center justify-between
   rounded-[10px] px-[16px] py-[10px] h-[108px] hover:bg-[var(--color-primary-100)] dark:hover:bg-[var(--color-primary-800)]">
     <div className="flex flex-col">
       <div className="flex items-center gap-2 text-lg capitalize dark:text-white/100 font-[600]">
