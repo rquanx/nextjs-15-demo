@@ -143,7 +143,6 @@ export const useKrea = () => {
       desc: prompt
     };
     setCurrentSession(newSession);
-    window.history.pushState({}, '', `${window.location.pathname}?id=${newSession.id}`);
   };
 
   const deleteSession = (id: string) => {
@@ -190,6 +189,9 @@ export const useKrea = () => {
       const isSessionCreated = sessions.find(i => i.id === updatedSession.id);
       const newSession = isSessionCreated ? sessions.map(i => i.id === updatedSession.id ? updatedSession : i) : [updatedSession, ...sessions]
       setSessions(newSession);
+      if (!isSessionCreated) {
+        window.history.pushState({}, '', `${window.location.pathname}?id=${updatedSession.id}`);
+      }
     } catch (error) {
       console.error('Failed to generate images:', error);
       throw error;
