@@ -1,6 +1,6 @@
 import { Model } from "@/app/hooks/useKrea";
 import { Popover, PopoverTrigger, PopoverContent, Button, Listbox, ListboxItem, useDisclosure } from "@heroui/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowDown } from "../Icon/ArrowDown";
 import { Selected } from "../Icon/Selected";
 
@@ -46,6 +46,16 @@ export function ModelsPanel({ models, currentModelId, setCurrentModelId }: Model
   const [selectedModel, setSelectedModel] = useState(currentModelId);
   const isEnterSelectRef = useRef(false);
   const isEnterItemRef = useRef(false);
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  if (!isMounted) {
+    return null
+  }
   return <Popover
     isOpen={isOpen}
     onOpenChange={(open) => (open ? onOpen() : onClose())}
